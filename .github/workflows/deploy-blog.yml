@@ -1,0 +1,44 @@
+# This is a basic workflow to help you get started with Actions
+
+name: Deploy my blog
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the "main" branch
+  push:
+    branches: [ "main" ]
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  deploy-gh-pages:
+    # 配置任务运行在最新的 Ubuntu Linux 运行器
+    runs-on: ubuntu-latest
+
+    # steps 表示将 deploy-gh-pages 任务下的所有步骤分为一组，嵌套的每一个条目都是一个独立的 action 或者 shell 脚本
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v3
+
+      # Runs a single command using the runners shell
+      - name: Run a one-line script
+        run: echo Hello, world!
+      
+      # 安装指定版本的 Node.js，让后续步骤可使用 npm 和 node 命令
+      - name: install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          cache: npm
+
+      - name: Install Dependencies
+        # run 表示告诉任务在运行器上执行一个命令
+        # npm ci 类似于 npm-install ，但它旨在用于自动化环境，如测试平台，持续集成和部署，比常规安装更严格，项目中必须有package-lock.json
+        run: npm install
+
+      - name: Build docs
+        env:
+          NODE_OPTIONS: --max_old_space_size=8192
+        run: |-
+          npm run docs:build
+          > src/.vuepress/dist/.nojekyll
